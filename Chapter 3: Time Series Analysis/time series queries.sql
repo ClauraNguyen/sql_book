@@ -64,6 +64,7 @@ WHERE kind_of_business in ('Men''s clothing stores','Women''s clothing stores')
 GROUP BY 1
 ORDER BY 1
 ;
+
 /*
 PIVOT - Yearly Difference of Women's and Men's Clothing Stores Sales
 */
@@ -97,7 +98,6 @@ and sales_month <= '2019-12-01'
 GROUP BY 1
 ORDER BY 1
 ;
-
 
 /*
 Yearly Ratio of Women's and Men's Clothing Stores Sales
@@ -144,6 +144,7 @@ ORDER BY 1
 /*
 Men's and Women's clothing stores sales as percent of monthly total
 */
+-- using aggregating and self-Join
 SELECT sales_month
 ,kind_of_business
 ,sales * 100 / total_sales as pct_total_sales
@@ -163,6 +164,7 @@ FROM
 ORDER BY 1,2
 ;
 
+-- Using sum window function
 SELECT sales_month
 ,kind_of_business
 ,sales
@@ -173,6 +175,9 @@ WHERE kind_of_business in ('Men''s clothing stores','Women''s clothing stores')
 ORDER BY 1
 ;
 
+/*
+Percentage of yearly sales each month
+*/
 SELECT sales_month
 ,kind_of_business
 ,sales * 100 / yearly_sales as pct_yearly
