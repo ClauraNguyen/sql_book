@@ -141,6 +141,9 @@ ORDER BY 1
 ;
 
 -- Percent of total calculations
+/*
+Men's and Women's clothing stores sales as percent of monthly total
+*/
 SELECT sales_month
 ,kind_of_business
 ,sales * 100 / total_sales as pct_total_sales
@@ -189,6 +192,9 @@ FROM
 ORDER BY 1,2
 ;
 
+/*
+Percent of 2019 Yearly Sales by Month: Women's and Men's Clothing Stores
+*/
 SELECT sales_month, kind_of_business, sales
 ,sum(sales) over (partition by date_part('year',sales_month), kind_of_business) as yearly_sales
 ,sales * 100 / sum(sales) over (partition by date_part('year',sales_month), kind_of_business) as pct_yearly
