@@ -259,7 +259,7 @@ FROM
 ;
 
 /*
-
+Indexed Men's and Women's Clothing Stores Sales 
 */
 SELECT sales_year, kind_of_business, sales
 ,(sales / first_value(sales) over (partition by kind_of_business order by sales_year) - 1) * 100 as pct_from_index
@@ -277,7 +277,7 @@ GROUP BY 1,2
 ------- Rolling time windows
 -- Calculating rolling time windows
 /*
-
+Rolling Sales Month 
 */
 SELECT a.sales_month
 ,a.sales
