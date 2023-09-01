@@ -176,7 +176,8 @@ ORDER BY 1
 ;
 
 /*
-Percentage of yearly sales each month
+Percentage of yearly sales each month: Women's and Men's Clothing Stores
+-- using self-join
 */
 SELECT sales_month
 ,kind_of_business
@@ -199,10 +200,11 @@ ORDER BY 1,2
 
 /*
 Percent of 2019 Yearly Sales by Month: Women's and Men's Clothing Stores
+using window function
 */
 SELECT sales_month, kind_of_business, sales
-,sum(sales) over (partition by date_part('year',sales_month), kind_of_business) as yearly_sales
-,sales * 100 / sum(sales) over (partition by date_part('year',sales_month), kind_of_business) as pct_yearly
+        ,sum(sales) over (partition by date_part('year',sales_month), kind_of_business) as yearly_sales
+        ,sales * 100 / sum(sales) over (partition by date_part('year',sales_month), kind_of_business) as pct_yearly
 FROM retail_sales 
 WHERE kind_of_business in ('Men''s clothing stores','Women''s clothing stores')
 ORDER BY 1,2
