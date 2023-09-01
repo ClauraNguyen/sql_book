@@ -19,6 +19,9 @@ ORDER BY 1
 ;
 
 -- Comparing components
+/*
+Yearly Sporting Goods, Hobby, Musical Instructment, and Book Store Sales
+*/
 SELECT date_part('year',sales_month) as sales_year
 ,kind_of_business
 ,sum(sales) as sales
