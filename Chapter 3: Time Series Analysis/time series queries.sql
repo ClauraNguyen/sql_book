@@ -215,7 +215,7 @@ ORDER BY 1,2
 
 -- INDEXING TO SEE PERCENT CHANGE OVER TIME
 /*
-
+Sales and index_sales value
 */
 SELECT sales_year, sales
 ,first_value(sales) over (order by sales_year) as index_sales
@@ -230,7 +230,7 @@ FROM
 ;
 
 /*
-
+Percent change from 1992
 */
 SELECT sales_year, sales
 ,(sales / index_sales - 1) * 100 as pct_from_index
