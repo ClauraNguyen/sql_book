@@ -1,6 +1,7 @@
 -- Trending the data
 -- Simple trends
 
+
 SELECT sales_month
 ,sales
 FROM retail_sales
@@ -8,6 +9,7 @@ WHERE kind_of_business = 'Retail and food services sales, total'
 ORDER BY 1
 ;
 
+-- Total Retail and Food Service Sales By Years
 SELECT date_part('year',sales_month) as sales_year
 ,sum(sales) as sales
 FROM retail_sales
