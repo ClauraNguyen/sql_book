@@ -9,7 +9,9 @@ WHERE kind_of_business = 'Retail and food services sales, total'
 ORDER BY 1
 ;
 
-/* Total Retail and Food Service Sales By Years*/
+/* 
+Total Retail and Food Service Sales By Years
+*/
 SELECT date_part('year',sales_month) as sales_year
 ,sum(sales) as sales
 FROM retail_sales
@@ -30,7 +32,9 @@ WHERE kind_of_business in ('Book stores','Sporting goods stores','Hobby, toy, an
 GROUP BY 1,2
 ORDER BY 1,2
 ;
-
+/*
+Monthly Women's and Men's Clothing Stores Sales
+*/
 SELECT sales_month
 ,kind_of_business
 ,sales
@@ -39,6 +43,9 @@ WHERE kind_of_business in ('Men''s clothing stores','Women''s clothing stores')
 ORDER BY 1,2
 ;
 
+/*
+Yearly Women's and Men's Clothing Stores Sales
+*/
 SELECT date_part('year',sales_month) as sales_year
 ,kind_of_business
 ,sum(sales) as sales
@@ -46,7 +53,9 @@ FROM retail_sales
 WHERE kind_of_business in ('Men''s clothing stores','Women''s clothing stores')
 GROUP BY 1,2
 ;
-
+/*
+PIVOT - Yearly Women's and Men's Clothing Stores Sales
+*/
 SELECT date_part('year',sales_month) as sales_year
 ,sum(case when kind_of_business = 'Women''s clothing stores' then sales end) as womens_sales
 ,sum(case when kind_of_business = 'Men''s clothing stores' then sales end) as mens_sales
@@ -55,7 +64,9 @@ WHERE kind_of_business in ('Men''s clothing stores','Women''s clothing stores')
 GROUP BY 1
 ORDER BY 1
 ;
-
+/*
+PIVOT - Yearly Difference of Women's and Men's Clothing Stores Sales
+*/
 SELECT sales_year
 ,womens_sales - mens_sales as womens_minus_mens
 ,mens_sales - womens_sales as mens_minus_womens
@@ -72,6 +83,10 @@ FROM
 ORDER BY 1
 ;
 
+
+/*
+Yearly Difference between Women's and Men's Clothing Stores Sales
+*/
 SELECT date_part('year',sales_month) as sales_year
 ,sum(case when kind_of_business = 'Women''s clothing stores' then sales end) 
  - sum(case when kind_of_business = 'Men''s clothing stores' then sales end) as womens_minus_mens
@@ -83,6 +98,10 @@ GROUP BY 1
 ORDER BY 1
 ;
 
+
+/*
+Yearly Ratio of Women's and Men's Clothing Stores Sales
+*/
 SELECT sales_year
 ,womens_sales / mens_sales as womens_times_of_mens
 FROM
@@ -98,6 +117,10 @@ FROM
 ORDER BY 1
 ;
 
+
+/*
+Yearly Percent Difference between Women's and Men's Clothing Stores Sales
+*/
 SELECT sales_year
 ,(womens_sales / mens_sales - 1) * 100 as womens_pct_of_mens
 FROM
