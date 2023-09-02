@@ -308,8 +308,9 @@ and a.sales_month >= '1993-01-01'
 GROUP BY 1,2
 ORDER BY 1
 ;
-/*
 
+/*
+Using windows function 
 */
 SELECT sales_month
 ,avg(sales) over (order by sales_month rows between 11 preceding and current row) as moving_avg
@@ -320,7 +321,7 @@ WHERE kind_of_business = 'Women''s clothing stores'
 
 -- Rolling time windows with sparse data
 /*
-
+12 sales monnth and sales with sparse data solution
 */
 SELECT a.date, b.sales_month, b.sales
 FROM date_dim a
@@ -334,8 +335,9 @@ JOIN
 WHERE a.date = a.first_day_of_month and a.date between '1993-01-01' and '2020-12-01'
 ORDER BY 1,2
 ;
-/*
 
+/*
+12 Month Moving Average sales for women's clothing stores with sparse time solution
 */
 SELECT a.date
 ,avg(b.sales) as moving_avg
@@ -352,7 +354,7 @@ GROUP BY 1
 ORDER BY 1
 ;
 /*
-
+12 Month Moving Average sales for women's clothing stores without sparse time solution
 */
 SELECT a.sales_month
 ,avg(b.sales) as moving_avg
