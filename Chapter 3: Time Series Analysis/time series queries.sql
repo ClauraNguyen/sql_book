@@ -292,7 +292,7 @@ WHERE a.kind_of_business = 'Women''s clothing stores'
 and a.sales_month = '2019-12-01'
 ;
 /*
-
+12 Month Moving Average sales for women's clothing stores 
 */
 SELECT a.sales_month
 ,a.sales
