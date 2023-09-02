@@ -371,7 +371,7 @@ GROUP BY 1
 
 -- Calculating cumulative values
 /*
-
+Cumulative annual sales for women's clothing stores 
 */
 SELECT sales_month
 ,sales
@@ -380,7 +380,8 @@ FROM retail_sales
 WHERE kind_of_business = 'Women''s clothing stores'
 ;
 /*
-
+Cumulative annual sales for women's clothing stores 
+using self-JOIN
 */
 SELECT a.sales_month, a.sales
 ,sum(b.sales) as sales_ytd
