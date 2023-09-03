@@ -353,6 +353,7 @@ WHERE a.date = a.first_day_of_month and a.date between '1993-01-01' and '2020-12
 GROUP BY 1
 ORDER BY 1
 ;
+
 /*
 12 Month Moving Average sales for women's clothing stores without sparse time solution
 */
@@ -396,7 +397,7 @@ GROUP BY 1,2
 ------- Analyzing with seasonality
 -- Period over period comparisons
 /*
-
+Find last month and last sales month
 */
 SELECT kind_of_business, sales_month, sales
 ,lag(sales_month) over (partition by kind_of_business order by sales_month) as prev_month
@@ -404,16 +405,18 @@ SELECT kind_of_business, sales_month, sales
 FROM retail_sales
 WHERE kind_of_business = 'Book stores'
 ;
-/*
 
+/*
+Percent growth from previous month for US retail book store sales 
 */
 SELECT kind_of_business, sales_month, sales
 ,(sales / lag(sales) over (partition by kind_of_business order by sales_month) - 1) * 100 as pct_growth_from_previous
 FROM retail_sales
 WHERE kind_of_business = 'Book stores'
 ;
-/*
 
+/*
+Percent growth from previous year for US retail book store sales 
 */
 SELECT sales_year, yearly_sales
 ,lag(yearly_sales) over (order by sales_year) as prev_year_sales
@@ -437,6 +440,7 @@ SELECT sales_month
 FROM retail_sales
 WHERE kind_of_business = 'Book stores'
 ;
+
 /*
 
 */
@@ -447,6 +451,7 @@ SELECT sales_month
 FROM retail_sales
 WHERE kind_of_business = 'Book stores'
 ;
+
 /*
 
 */
@@ -456,6 +461,7 @@ SELECT sales_month, sales
 FROM retail_sales
 WHERE kind_of_business = 'Book stores'
 ;
+
 /*
 
 */
@@ -480,6 +486,7 @@ SELECT sales_month, sales
 FROM retail_sales
 WHERE kind_of_business = 'Book stores'
 ;
+
 /*
 
 */
