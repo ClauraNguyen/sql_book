@@ -1,4 +1,4 @@
--- Trending the data
+-- TRENDING THE DATA
 -- SIMPLE TRENDS 
 
 SELECT sales_month
@@ -432,7 +432,7 @@ FROM
 ) a
 ;
 
--- Period over period comparisons - Same month vs. last year
+-- PERIOD OVER PERIOD COMPARISONS - SAME MONTH VS. LAST YEAR
 /*
 Take the month part
 */
