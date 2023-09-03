@@ -85,7 +85,6 @@ FROM
 ORDER BY 1
 ;
 
-
 /*
 Yearly Difference between Women's and Men's Clothing Stores Sales
 */
@@ -117,7 +116,6 @@ FROM
 ) a
 ORDER BY 1
 ;
-
 
 /*
 Yearly Percent Difference between Women's and Men's Clothing Stores Sales
@@ -274,8 +272,8 @@ GROUP BY 1,2
 ) a
 ;
 
-------- Rolling time windows
--- Calculating rolling time windows
+------- ROLLING TIME WINDOWS
+-- CALCULATING ROLLING TIME WINDOWS
 /*
 Rolling Sales Month 
 */
@@ -319,7 +317,7 @@ FROM retail_sales
 WHERE kind_of_business = 'Women''s clothing stores'
 ;
 
--- Rolling time windows with sparse data
+-- ROLLING TIME WINDOWS WITH SPARSE DATA
 /*
 12 sales monnth and sales with sparse data solution
 */
@@ -370,7 +368,8 @@ and b.kind_of_business = 'Women''s clothing stores'
 GROUP BY 1
 ;
 
--- Calculating cumulative values
+-- CALCULATING CUMULATIVE VALUES
+
 /*
 Cumulative annual sales for women's clothing stores 
 */
@@ -380,6 +379,7 @@ SELECT sales_month
 FROM retail_sales
 WHERE kind_of_business = 'Women''s clothing stores'
 ;
+
 /*
 Cumulative annual sales for women's clothing stores 
 using self-JOIN
@@ -394,8 +394,8 @@ WHERE a.kind_of_business = 'Women''s clothing stores'
 GROUP BY 1,2
 ;
 
-------- Analyzing with seasonality
--- Period over period comparisons
+------- ANALYZING WITH SEASONALITY
+-- PERIOD OVER PERIOD COMPARISONS
 /*
 Find last month and last sales month
 */
@@ -433,7 +433,7 @@ FROM
 
 -- Period over period comparisons - Same month vs. last year
 /*
-
+Take the month part
 */
 SELECT sales_month
 ,date_part('month',sales_month)
@@ -442,7 +442,7 @@ WHERE kind_of_business = 'Book stores'
 ;
 
 /*
-
+previous year month and previous year sales
 */
 SELECT sales_month
 ,sales
@@ -453,7 +453,7 @@ WHERE kind_of_business = 'Book stores'
 ;
 
 /*
-
+YoY absolute difference in sales, and YoY percent growth 
 */
 SELECT sales_month, sales
 ,sales - lag(sales) over (partition by date_part('month',sales_month) order by sales_month) as absolute_diff
@@ -463,7 +463,7 @@ WHERE kind_of_business = 'Book stores'
 ;
 
 /*
-
+PIVOT - Monthly book store sales, 1992-1994
 */
 SELECT date_part('month',sales_month) as month_number
 ,to_char(sales_month,'Month') as month_name
