@@ -54,6 +54,7 @@ FROM retail_sales
 WHERE kind_of_business in ('Men''s clothing stores','Women''s clothing stores')
 GROUP BY 1,2
 ;
+
 /*
 PIVOT - Yearly Women's and Men's Clothing Stores Sales
 */
@@ -477,7 +478,7 @@ GROUP BY 1,2
 
 -- Comparing to multiple prior periods
 /*
-
+same month sales over 3 prior year
 */
 SELECT sales_month, sales
 ,lag(sales,1) over (partition by date_part('month',sales_month) order by sales_month) as prev_sales_1
@@ -488,7 +489,7 @@ WHERE kind_of_business = 'Book stores'
 ;
 
 /*
-
+YoY percent growth from the prior three-year rolling average in mid 1990s
 */
 SELECT sales_month, sales
 ,sales / avg(sales) over (partition by date_part('month',sales_month) order by sales_month rows between 3 preceding and 1 preceding) as pct_of_prev_3
