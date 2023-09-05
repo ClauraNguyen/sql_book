@@ -531,17 +531,17 @@ GROUP BY 1,2,3
 
 ----------- DEFINING COHORTS FROM DATES OTHER THAN THE FIRST DATE-----------------------------
 /*
-
+legislator in office at any time during the year 2000
 */
 SELECT distinct id_bioguide, term_type, date('2000-01-01') as first_term
 ,min(term_start) as min_start
 FROM legislators_terms 
 WHERE term_start <= '2000-12-31' and term_end >= '2000-01-01'
-GROUP BY 1,2,3
+GROUP BY 1,2,3 
 ;
 
 /*
-
+retention by term type for legislators in office during the year 2000
 */
 SELECT term_type, period
 ,first_value(cohort_retained) over (partition by term_type order by period) as cohort_size
@@ -566,9 +566,9 @@ FROM
 ) aa
 ;
 
------------ SURVIVORSHIP  ----------------------------------
+----------- SURVIVORSHIP  ------------------ questions bout how long something lasts
 /*
-
+the first and last term start dates
 */
 SELECT id_bioguide
 ,min(term_start) as first_term
@@ -578,7 +578,7 @@ GROUP BY 1
 ;
 
 /*
-
+tenure: number of years btw the min and max term starts
 */
 SELECT id_bioguide
 ,date_part('century',min(term_start)) as first_century
@@ -590,7 +590,7 @@ GROUP BY 1
 ;
 
 /*
-
+percent who survived for at least 10 years by century
 */
 SELECT first_century
 ,count(distinct id_bioguide) as cohort_size
@@ -622,7 +622,7 @@ GROUP BY 1
 ;
 
 /*
-
+percent who survived for at least 5 years by century
 */
 SELECT first_century
 ,count(distinct id_bioguide) as cohort_size
@@ -641,7 +641,7 @@ GROUP BY 1
 ;
 
 /*
-
+Legislator survivorship by century - Number of terms |||  survivorship for legislator: sharre of cohort who stayed in office for that many terms or longer
 */
 SELECT a.first_century
 ,b.terms
@@ -665,9 +665,9 @@ JOIN
 GROUP BY 1,2
 ;
 
------------ RETURSHIP/REPEAT PURCHASE BEHAVIOUR -----------------------------
+----------- RETURSHIP/REPEAT PURCHASE BEHAVIOUR ------------------------- whether those buyers have become repeat buyers
 /*
-
+cohort size for each century
 */
 SELECT date_part('century',a.first_term)::int as cohort_century
 ,count(id_bioguide) as reps
@@ -681,7 +681,7 @@ FROM
 GROUP BY 1
 ;
 /*
-
+find the representatives who later became senators
 */
 SELECT date_part('century',a.first_term) as cohort_century
 ,count(id_bioguide) as reps
@@ -696,7 +696,7 @@ GROUP BY 1
 ORDER BY 1
 ;
 /*
-
+percent of representatives who became senators
 */
 SELECT aa.cohort_century
 ,bb.rep_and_sen * 1.0 / aa.reps as pct_rep_and_sen
@@ -729,8 +729,9 @@ LEFT JOIN
         GROUP BY 1
 ) bb on aa.cohort_century = bb.cohort_century
 ;
-/*
 
+/*
+applied a time box of 10 years to ensure a fair comparison
 */
 SELECT aa.cohort_century
 ,bb.rep_and_sen * 1.0 / aa.reps as pct_rep_and_sen
@@ -767,7 +768,7 @@ LEFT JOIN
 ;
 
 /*
-
+compare several time windows, excluse those were less than 10 years
 */
 SELECT aa.cohort_century::int as cohort_century
 ,round(bb.rep_and_sen_5_yrs * 1.0 / aa.reps,4) as pct_5_yrs
@@ -805,10 +806,10 @@ LEFT JOIN
         GROUP BY 1
 ) bb on aa.cohort_century = bb.cohort_century
 ;
-
------------ CUMULATIVE CALCULATIONS --------------------------
+-- Trend of the share of representatives for each cohort, defined by starting decade, who later became senators
+----------- CUMULATIVE CALCULATIONS --------------------- revenue- generating activities of customers
 /*
-
+number of terms started within 10 years of the first term-start
 */
 SELECT date_part('century',a.first_term)::int as century
 ,first_type
