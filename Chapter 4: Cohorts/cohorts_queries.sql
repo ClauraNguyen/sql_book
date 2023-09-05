@@ -1,10 +1,15 @@
 -- BASIC RETENTION
+/*
+First date each legislator took office (first term)
+*/
 SELECT id_bioguide
 ,min(term_start) as first_term
 FROM legislators_terms 
 GROUP BY 1
 ;
-
+/*
+Periods and the number of legislators retained in each
+*/
 SELECT date_part('year',age(b.term_start,a.first_term)) as periods
 ,count(distinct a.id_bioguide) as cohort_retained
 FROM
@@ -17,7 +22,9 @@ FROM
 JOIN legislators_terms b on a.id_bioguide = b.id_bioguide 
 GROUP BY 1
 ;
-
+/*
+Legislator Retention - Retention from start of first term for US legislators, Percent retained
+*/
 SELECT period
 ,first_value(cohort_retained) over (order by period) as cohort_size
 ,cohort_retained
@@ -37,7 +44,9 @@ FROM
         GROUP BY 1
 ) aa
 ;
-
+/*
+Pivot and flattent the results
+*/
 SELECT cohort_size
 ,max(case when period = 0 then pct_retained end) as yr0
 ,max(case when period = 1 then pct_retained end) as yr1
@@ -70,6 +79,9 @@ GROUP BY 1
 ;
 
 -- TIME ADJUSTMENTS
+/*
+filling missing value 
+*/
 SELECT a.id_bioguide, a.first_term
 ,b.term_start, b.term_end
 ,c.date
@@ -84,7 +96,9 @@ JOIN legislators_terms b on a.id_bioguide = b.id_bioguide
 LEFT JOIN date_dim c on c.date between b.term_start and b.term_end 
 and c.month_name = 'December' and c.day_of_month = 31
 ;
-
+/*
+calculate the cohort retained for each period
+*/
 SELECT coalesce(date_part('year',age(c.date,a.first_term)),0) as period
 ,count(distinct a.id_bioguide) as cohort_retained
 FROM
@@ -98,7 +112,9 @@ LEFT JOIN date_dim c on c.date between b.term_start and b.term_end
 and c.month_name = 'December' and c.day_of_month = 31
 GROUP BY 1
 ;
-
+/*
+Legislator retention after adjusting for actual years in office
+*/
 SELECT period
 ,first_value(cohort_retained) over (order by period) as cohort_size
 ,cohort_retained
@@ -120,7 +136,9 @@ FROM
         GROUP BY 1
 ) aa
 ;
-
+/*
+add a fixed interval to the start date - case data set does not contain an end date
+*/
 SELECT a.id_bioguide, a.first_term
 ,b.term_start
 ,case when b.term_type = 'rep' then b.term_start + interval '2 years'
@@ -134,7 +152,9 @@ FROM
 ) a
 JOIN legislators_terms b on a.id_bioguide = b.id_bioguide 
 ;
-
+/*
+use subsequent starting date minus 1 day as term end - case data set does not contain an end date
+*/
 SELECT a.id_bioguide, a.first_term
 ,b.term_start
 ,lead(b.term_start) over (partition by a.id_bioguide order by b.term_start) 
