@@ -1,4 +1,4 @@
--- Basic retention
+-- BASIC RETENTION
 SELECT id_bioguide
 ,min(term_start) as first_term
 FROM legislators_terms 
@@ -69,7 +69,7 @@ FROM
 GROUP BY 1
 ;
 
--- Time adjustments
+-- TIME ADJUSTMENTS
 SELECT a.id_bioguide, a.first_term
 ,b.term_start, b.term_end
 ,c.date
@@ -149,7 +149,7 @@ JOIN legislators_terms b on a.id_bioguide = b.id_bioguide
 ORDER BY 1,3
 ;
 
--- Time-based cohorts derived from the time-series
+-- TIME-BASED COHORTS DERIVED FROM THE TIME-SERIES
 
 SELECT date_part('year',a.first_term) as first_year
 ,coalesce(date_part('year',age(c.date,a.first_term)),0) as period
@@ -243,7 +243,7 @@ FROM
 ORDER BY 1,2
 ;
 
--- Defining the cohort from a separate table
+-- DEFINING THE COHORT FROM A SEPARATE TABLE
 SELECT d.gender
 ,coalesce(date_part('year',age(c.date,a.first_term)),0) as period
 ,count(distinct a.id_bioguide) as cohort_retained
@@ -312,7 +312,7 @@ FROM
 ORDER BY 2,1
 ;
 
------------ Dealing with sparse cohorts
+----------- DEALING WITH SPARSE COHORTS
 SELECT first_state, gender, period
 ,first_value(cohort_retained) over (partition by first_state, gender 
                                     order by period) as cohort_size
@@ -483,7 +483,7 @@ FROM
 GROUP BY 1,2,3
 ;
 
------------ Defining cohorts from dates other than the first date ----------------------------------
+----------- DEFINING COHORTS FROM DATES OTHER THAN THE FIRST DATE-----------------------------
 
 SELECT distinct id_bioguide, term_type, date('2000-01-01') as first_term
 ,min(term_start) as min_start
@@ -516,7 +516,7 @@ FROM
 ) aa
 ;
 
------------ Survivorship ----------------------------------
+----------- SURVIVORSHIP  ----------------------------------
 SELECT id_bioguide
 ,min(term_start) as first_term
 ,max(term_start) as last_term
@@ -602,7 +602,7 @@ JOIN
 GROUP BY 1,2
 ;
 
------------ Returnship / repeat purchase behavior ----------------------------------
+----------- RETURSHIP/REPEAT PURCHASE BEHAVIOUR -----------------------------
 SELECT date_part('century',a.first_term)::int as cohort_century
 ,count(id_bioguide) as reps
 FROM
@@ -732,7 +732,7 @@ LEFT JOIN
 ) bb on aa.cohort_century = bb.cohort_century
 ;
 
------------ Cumulative calculations ----------------------------------
+----------- CUMULATIVE CALCULATIONS --------------------------
 SELECT date_part('century',a.first_term)::int as century
 ,first_type
 ,count(distinct a.id_bioguide) as cohort
@@ -775,7 +775,7 @@ FROM
 GROUP BY 1
 ;
 
------------ Cross-section analysis, with a cohort lens ----------------------------------
+----------- CROSS-SECTION ANALYSIS, WITH A COHORT LENS --------------------------
 SELECT b.date, count(distinct a.id_bioguide) as legislators
 FROM legislators_terms a
 JOIN date_dim b on b.date between a.term_start and a.term_end
