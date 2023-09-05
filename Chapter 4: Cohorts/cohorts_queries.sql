@@ -170,7 +170,9 @@ ORDER BY 1,3
 ;
 
 -- TIME-BASED COHORTS DERIVED FROM THE TIME-SERIES
-
+/*
+calculate yearly cohorts
+*/
 SELECT date_part('year',a.first_term) as first_year
 ,coalesce(date_part('year',age(c.date,a.first_term)),0) as period
 ,count(distinct a.id_bioguide) as cohort_retained
@@ -185,7 +187,9 @@ LEFT JOIN date_dim c on c.date between b.term_start and b.term_end
 and c.month_name = 'December' and c.day_of_month = 31
 GROUP BY 1,2
 ;
-
+/*
+legislator retention by year in which first term began
+*/
 SELECT first_year
 ,period
 ,first_value(cohort_retained) over (partition by first_year order by period) as cohort_size
@@ -207,7 +211,9 @@ FROM
         GROUP BY 1,2
 ) aa
 ;
-
+/*
+legislator retention by century in which first term began
+*/
 SELECT first_century, period
 ,first_value(cohort_retained) over (partition by first_century order by period) as cohort_size
 ,cohort_retained
@@ -231,13 +237,17 @@ FROM
 ) aa
 ORDER BY 1,2
 ;
-
+/*
+Find first state for each legislator
+*/
 SELECT distinct id_bioguide
 ,min(term_start) over (partition by id_bioguide) as first_term
 ,first_value(state) over (partition by id_bioguide order by term_start) as first_state
 FROM legislators_terms 
 ;
-
+/*
+legislator retention by first state: top five state by total legislators
+*/
 SELECT first_state, period
 ,first_value(cohort_retained) over (partition by first_state order by period) as cohort_size
 ,cohort_retained
@@ -264,6 +274,9 @@ ORDER BY 1,2
 ;
 
 -- DEFINING THE COHORT FROM A SEPARATE TABLE
+/*
+add gender to the calculation of cohort retained
+*/
 SELECT d.gender
 ,coalesce(date_part('year',age(c.date,a.first_term)),0) as period
 ,count(distinct a.id_bioguide) as cohort_retained
@@ -280,7 +293,9 @@ JOIN legislators d on a.id_bioguide = d.id_bioguide
 GROUP BY 1,2
 ORDER BY 2,1
 ;
-
+/*
+Legislator retention by gender
+*/
 SELECT gender, period
 ,first_value(cohort_retained) over (partition by gender order by period) as cohort_size
 ,cohort_retained
@@ -305,7 +320,9 @@ FROM
 ) aa
 ORDER BY 2,1
 ;
-
+/*
+Legislator retention by gender: cohorts from 1917 ans 1999 (reduce bias with a time windows since have wonmen in congress)
+*/
 SELECT gender, period
 ,first_value(cohort_retained) over (partition by gender order by period) as cohort_size
 ,cohort_retained
@@ -333,6 +350,9 @@ ORDER BY 2,1
 ;
 
 ----------- DEALING WITH SPARSE COHORTS
+/*
+legislator retention by first state and gender
+*/
 SELECT first_state, gender, period
 ,first_value(cohort_retained) over (partition by first_state, gender 
                                     order by period) as cohort_size
@@ -363,7 +383,9 @@ FROM
 ;
 
 
-
+/*
+ (return zero values for retention instead of nulls)
+*/
 SELECT aa.gender, aa.first_state, cc.period, aa.cohort_size
 FROM
 (
@@ -388,7 +410,9 @@ JOIN
 ) cc on 1 = 1
 ;
 
-
+/*
+legislator retention by first state and gender (return zero values for retention instead of nulls)
+*/
 SELECT aaa.gender, aaa.first_state, aaa.period, aaa.cohort_size
 ,coalesce(ddd.cohort_retained,0) as cohort_retained
 ,coalesce(ddd.cohort_retained,0) * 1.0 / aaa.cohort_size as pct_retained
@@ -440,7 +464,9 @@ LEFT JOIN
 and aaa.period = ddd.period
 ORDER BY 1,2,3
 ;
-
+/*
+pivot the results
+*/
 SELECT gender, first_state, cohort_size
 ,max(case when period = 0 then pct_retained end) as yr0
 ,max(case when period = 2 then pct_retained end) as yr2
@@ -504,7 +530,9 @@ GROUP BY 1,2,3
 ;
 
 ----------- DEFINING COHORTS FROM DATES OTHER THAN THE FIRST DATE-----------------------------
+/*
 
+*/
 SELECT distinct id_bioguide, term_type, date('2000-01-01') as first_term
 ,min(term_start) as min_start
 FROM legislators_terms 
@@ -512,7 +540,9 @@ WHERE term_start <= '2000-12-31' and term_end >= '2000-01-01'
 GROUP BY 1,2,3
 ;
 
+/*
 
+*/
 SELECT term_type, period
 ,first_value(cohort_retained) over (partition by term_type order by period) as cohort_size
 ,cohort_retained
@@ -537,6 +567,9 @@ FROM
 ;
 
 ----------- SURVIVORSHIP  ----------------------------------
+/*
+
+*/
 SELECT id_bioguide
 ,min(term_start) as first_term
 ,max(term_start) as last_term
@@ -544,7 +577,9 @@ FROM legislators_terms
 GROUP BY 1
 ;
 
+/*
 
+*/
 SELECT id_bioguide
 ,date_part('century',min(term_start)) as first_century
 ,min(term_start) as first_term
@@ -554,7 +589,9 @@ FROM legislators_terms
 GROUP BY 1
 ;
 
+/*
 
+*/
 SELECT first_century
 ,count(distinct id_bioguide) as cohort_size
 ,count(distinct case when tenure >= 10 then id_bioguide end) as survived_10
@@ -572,7 +609,9 @@ FROM
 ) a
 GROUP BY 1
 ;
+/*
 
+*/
 SELECT id_bioguide
 ,date_part('century',min(term_start)) as first_century
 ,min(term_start) as first_term
@@ -582,7 +621,9 @@ FROM legislators_terms
 GROUP BY 1
 ;
 
+/*
 
+*/
 SELECT first_century
 ,count(distinct id_bioguide) as cohort_size
 ,count(distinct case when total_terms >= 5 then id_bioguide end) as survived_5
@@ -599,7 +640,9 @@ FROM
 GROUP BY 1
 ;
 
+/*
 
+*/
 SELECT a.first_century
 ,b.terms
 ,count(distinct id_bioguide) as cohort
@@ -623,6 +666,9 @@ GROUP BY 1,2
 ;
 
 ----------- RETURSHIP/REPEAT PURCHASE BEHAVIOUR -----------------------------
+/*
+
+*/
 SELECT date_part('century',a.first_term)::int as cohort_century
 ,count(id_bioguide) as reps
 FROM
@@ -634,7 +680,9 @@ FROM
 ) a
 GROUP BY 1
 ;
+/*
 
+*/
 SELECT date_part('century',a.first_term) as cohort_century
 ,count(id_bioguide) as reps
 FROM
@@ -647,7 +695,9 @@ FROM
 GROUP BY 1
 ORDER BY 1
 ;
+/*
 
+*/
 SELECT aa.cohort_century
 ,bb.rep_and_sen * 1.0 / aa.reps as pct_rep_and_sen
 FROM
@@ -679,7 +729,9 @@ LEFT JOIN
         GROUP BY 1
 ) bb on aa.cohort_century = bb.cohort_century
 ;
+/*
 
+*/
 SELECT aa.cohort_century
 ,bb.rep_and_sen * 1.0 / aa.reps as pct_rep_and_sen
 FROM
@@ -714,7 +766,9 @@ LEFT JOIN
 ) bb on aa.cohort_century = bb.cohort_century
 ;
 
+/*
 
+*/
 SELECT aa.cohort_century::int as cohort_century
 ,round(bb.rep_and_sen_5_yrs * 1.0 / aa.reps,4) as pct_5_yrs
 ,round(bb.rep_and_sen_10_yrs * 1.0 / aa.reps,4) as pct_10_yrs
@@ -753,6 +807,9 @@ LEFT JOIN
 ;
 
 ----------- CUMULATIVE CALCULATIONS --------------------------
+/*
+
+*/
 SELECT date_part('century',a.first_term)::int as century
 ,first_type
 ,count(distinct a.id_bioguide) as cohort
@@ -768,7 +825,9 @@ FROM
 LEFT JOIN legislators_terms b on a.id_bioguide = b.id_bioguide and b.term_start between a.first_term and a.first_plus_10
 GROUP BY 1,2
 ;
+/*
 
+*/
 SELECT century
 ,max(case when first_type = 'rep' then cohort end) as rep_cohort
 ,max(case when first_type = 'rep' then terms_per_leg end) as avg_rep_terms
@@ -796,6 +855,9 @@ GROUP BY 1
 ;
 
 ----------- CROSS-SECTION ANALYSIS, WITH A COHORT LENS --------------------------
+/*
+
+*/
 SELECT b.date, count(distinct a.id_bioguide) as legislators
 FROM legislators_terms a
 JOIN date_dim b on b.date between a.term_start and a.term_end
@@ -804,7 +866,9 @@ and b.day_of_month = 31
 and b.year <= 2019
 GROUP BY 1
 ;
+/*
 
+*/
 SELECT b.date
 ,date_part('century',first_term)::int as century
 ,count(distinct a.id_bioguide) as legislators
@@ -818,7 +882,9 @@ JOIN
 ) c on a.id_bioguide = c.id_bioguide        
 GROUP BY 1,2
 ;
+/*
 
+*/
 SELECT date
 ,century
 ,legislators
@@ -841,7 +907,9 @@ FROM
 ) a
 ORDER BY 1,2
 ;
+/*
 
+*/
 SELECT date
 ,coalesce(sum(case when century = 18 then legislators end) * 100.0 / sum(legislators),0) as pct_18
 ,coalesce(sum(case when century = 19 then legislators end) * 100.0 / sum(legislators),0) as pct_19
@@ -865,7 +933,9 @@ FROM
 GROUP BY 1
 ORDER BY 1
 ;
+/*
 
+*/
 SELECT id_bioguide, date
 ,count(date) over (partition by id_bioguide order by date rows between unbounded preceding and current row) as cume_years
 FROM
@@ -875,7 +945,9 @@ FROM
         JOIN date_dim b on b.date between a.term_start and a.term_end and b.month_name = 'December' and b.day_of_month = 31 and b.year <= 2019
 ) a
 ;
+/*
 
+*/
 SELECT date, cume_years
 ,count(distinct id_bioguide) as legislators
 FROM
@@ -894,7 +966,9 @@ FROM
 ) aaa
 GROUP BY 1,2
 ;
+/*
 
+*/
 SELECT date, count(*) as tenures
 FROM 
 (
@@ -916,7 +990,9 @@ FROM
 ) aaaa
 GROUP BY 1
 ;
+/*
 
+*/
 SELECT date, tenure
 ,legislators * 100.0 /
  sum(legislators) over (partition by date) as pct_legislators 
