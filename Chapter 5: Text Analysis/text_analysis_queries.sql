@@ -1,39 +1,57 @@
----- Text characteristics
+---- I. TEXT CHARACTERISTICS
+/*
+
+*/
 SELECT length(sighting_report), count(*) as records
 FROM ufo
 GROUP BY 1
 ORDER BY 1
 ;
 
----- Text parsing
+---- II. TEXT PARSING
+/*
+
+*/
 SELECT left(sighting_report,8) as left_digits
 ,count(*)
 FROM ufo
 GROUP BY 1
 ;
+/*
 
+*/
 SELECT right(left(sighting_report,25),14) as occurred
 FROM ufo
 ;
+/*
 
+*/
 SELECT split_part(sighting_report,'Occurred : ',2) as split_1
 FROM ufo
 ;
+/*
 
+*/
 SELECT split_part(sighting_report,' (Entered',1) as split_2
 FROM ufo
 ;
+/*
 
+*/
 SELECT split_part(
 split_part(sighting_report,' (Entered',1)
 ,'Occurred : ',2) as occurred
 FROM ufo
 ;
+/*
 
+*/
 SELECT split_part(split_part(split_part(sighting_report,' (Entered',1),'Occurred : ',2),'Reported',1) as occurred
 FROM ufo
 ;
+/*
 
+*/
 SELECT split_part(split_part(split_part(sighting_report,' (Entered',1),'Occurred : ',2),'Reported',1) as occurred
 ,split_part(split_part(sighting_report,')',1),'Entered as : ',2) as entered_as
 ,split_part(split_part(split_part(split_part(sighting_report,'Post',1),'Reported: ',2),' AM',1),' PM',1) as reported
@@ -44,7 +62,10 @@ SELECT split_part(split_part(split_part(sighting_report,' (Entered',1),'Occurred
 FROM ufo
 ;
 
----- Text transformations
+---- III. TEXT TRANSFORMATIONS
+/*
+
+*/
 SELECT distinct shape, initcap(shape) as shape_clean
 FROM
 (
@@ -54,7 +75,9 @@ FROM
         FROM ufo
 ) a
 ;
+/*
 
+*/
 SELECT duration, trim(duration) as duration_clean
 FROM
 (
@@ -62,7 +85,9 @@ FROM
     FROM ufo
 ) a
 ;
+/*
 
+*/
 SELECT occurred::timestamp
 ,reported::timestamp as reported
 ,posted::date as posted
@@ -75,7 +100,9 @@ FROM
         limit 10
 ) a
 ;
+/*
 
+*/
 SELECT 
 case when occurred = '' then null 
      when length(occurred) < 8 then null
@@ -95,7 +122,9 @@ FROM
         FROM ufo
 ) a
 ;
+/*
 
+*/
 SELECT location
 ,replace(replace(location,'close to','near')
 ,'outside of','near') as location_clean
@@ -105,7 +134,9 @@ FROM
         FROM ufo
 ) a
 ;
+/*
 
+*/
 SELECT 
 case when occurred = '' then null 
      when length(occurred) < 8 then null
@@ -134,41 +165,56 @@ FROM
 ) a
 ;
 
----- Finding elements within larger blocks of text
--- Wildcard matches
+---- IV. FINDING ELEMENTS WITHIN LARGER BLOCKS OF TEXT
+------ 4.1. Wildcard matches
+/*
+
+*/
 SELECT count(*)
 FROM ufo
 WHERE description like '%wife%'
 ;
+/*
 
+*/
 SELECT count(*)
 FROM ufo
 WHERE lower(description) like '%wife%'
 ;
+/*
 
+*/
 SELECT count(*)
 FROM ufo
 WHERE description ilike '%wife%'
 ;
+/*
 
+*/
 SELECT count(*)
 FROM ufo
 WHERE lower(description) not like '%wife%'
 ;
+/*
 
+*/
 SELECT count(*)
 FROM ufo
 WHERE lower(description) like '%wife%'
 or lower(description) like '%husband%'
 ;
+/*
 
+*/
 SELECT count(*)
 FROM ufo
 WHERE lower(description) like '%wife%'
 or lower(description) like '%husband%'
 and lower(description) like '%mother%'
 ;
+/*
 
+*/
 SELECT count(*)
 FROM ufo
 WHERE (lower(description) like '%wife%'
@@ -176,7 +222,9 @@ WHERE (lower(description) like '%wife%'
        )
 and lower(description) like '%mother%'
 ;
+/*
 
+*/
 SELECT 
 case when lower(description) like '%driving%' then 'driving'
      when lower(description) like '%walking%' then 'walking'
@@ -189,7 +237,9 @@ FROM ufo
 GROUP BY 1
 ORDER BY 2 desc
 ;
+/*
 
+*/
 SELECT description ilike '%south%' as south
 ,description ilike '%north%' as north
 ,description ilike '%east%' as east
@@ -199,7 +249,9 @@ FROM ufo
 GROUP BY 1,2,3,4
 ORDER BY 1,2,3,4
 ;
+/*
 
+*/
 SELECT 
 count(case when description ilike '%south%' then 1 end) as south
 ,count(case when description ilike '%north%' then 1 end) as north
@@ -208,7 +260,10 @@ count(case when description ilike '%south%' then 1 end) as south
 FROM ufo
 ;
 
--- Exact matches
+------ 4.2. Exact matches
+/*
+
+*/
 SELECT first_word, description
 FROM
 (
@@ -224,7 +279,9 @@ or first_word = 'Blue'
 or first_word = 'Purple'
 or first_word = 'White'
 ;
+/*
 
+*/
 SELECT first_word, description
 FROM
 (
@@ -234,7 +291,9 @@ FROM
 ) a
 WHERE first_word in ('Red','Orange','Yellow','Green','Blue','Purple','White')
 ;
+/*
 
+*/
 SELECT 
 case when lower(first_word) in ('red','orange','yellow','green', 
 'blue','purple','white') then 'Color'
@@ -257,13 +316,18 @@ GROUP BY 1
 ORDER BY 2 desc
 ;
 
--- Regular expressions
--- Finding and replacing with Regex
+------ 4.3. Regular expressions
+------ 4.3.1. Finding and replacing with Regex
+/*
+
+*/
 SELECT left(description,50)
 FROM ufo
 WHERE left(description,50) ~ '[0-9]+ light[s ,.]'
 ;
+/*
 
+*/
 SELECT (regexp_matches(description,'[0-9]+ light[s ,.]'))[1]
 ,count(*)
 FROM ufo
@@ -271,7 +335,9 @@ WHERE description ~ '[0-9]+ light[s ,.]'
 GROUP BY 1
 ORDER BY 2 desc
 ; 
+/*
 
+*/
 SELECT min(split_part(matched_text,' ',1)::int) as min_lights
 ,max(split_part(matched_text,' ',1)::int) as max_lights
 FROM
@@ -283,13 +349,17 @@ FROM
         GROUP BY 1
 ) a
 ; 
+/*
 
+*/
 SELECT split_part(sighting_report,'Duration:',2) as duration
 ,count(*) as reports
 FROM ufo
 GROUP BY 1
 ;
+/*
 
+*/
 SELECT duration
 ,(regexp_matches(duration,'\m[Mm][Ii][Nn][A-Za-z]*\y'))[1] as matched_minutes
 FROM
@@ -300,7 +370,9 @@ FROM
         GROUP BY 1
 ) a
 ;
+/*
 
+*/
 SELECT duration
 ,(regexp_matches(duration,'\m[Mm][Ii][Nn][A-Za-z]*\y'))[1] as matched_minutes
 ,regexp_replace(duration,'\m[Mm][Ii][Nn][A-Za-z]*\y','min') as replaced_text
@@ -313,6 +385,9 @@ FROM
 ) a
 ;
 
+/*
+
+*/
 SELECT duration
 ,(regexp_matches(duration,'\m[Hh][Oo][Uu][Rr][A-Za-z]*\y'))[1] as matched_hour
 ,(regexp_matches(duration,'\m[Mm][Ii][Nn][A-Za-z]*\y'))[1] as matched_minutes
@@ -326,7 +401,10 @@ FROM
 ) a
 ;
 
------ Constructing and reshaping text
+----- V. CONTRUCTING AND RESHAPING TEXT
+/*
+
+*/
 SELECT concat(shape, ' (shape)') as shape
 ,concat(reports, ' reports') as reports
 FROM
@@ -338,6 +416,9 @@ FROM
 ) a
 ;
 
+/*
+
+*/
 SELECT concat(shape,' - ',location) as shape_location
 ,reports
 FROM
@@ -350,6 +431,9 @@ FROM
 ) a
 ;
 
+/*
+
+*/
 SELECT 
 concat('There were '
        ,reports
@@ -389,6 +473,9 @@ FROM
 ;
 
 -- Reshaping
+/*
+
+*/
 SELECT location
 ,string_agg(shape,', ' order by shape asc) as shapes
 FROM
@@ -406,6 +493,9 @@ FROM
 GROUP BY 1
 ;
 
+/*
+
+*/
 SELECT word, count(*) as frequency
 FROM
 (
@@ -416,6 +506,9 @@ GROUP BY 1
 ORDER BY 2 desc
 ;
 
+/*
+
+*/
 SELECT word, count(*) as frequency
 FROM
 (
