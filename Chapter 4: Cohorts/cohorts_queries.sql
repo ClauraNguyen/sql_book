@@ -827,7 +827,7 @@ LEFT JOIN legislators_terms b on a.id_bioguide = b.id_bioguide and b.term_start 
 GROUP BY 1,2
 ;
 /*
-
+PIVOT - average terms per legislator by first type and century
 */
 SELECT century
 ,max(case when first_type = 'rep' then cohort end) as rep_cohort
@@ -856,8 +856,9 @@ GROUP BY 1
 ;
 
 ----------- CROSS-SECTION ANALYSIS, WITH A COHORT LENS --------------------------
+-- COHORT ON FIRST TERM
 /*
-
+number of legislators in office each year
 */
 SELECT b.date, count(distinct a.id_bioguide) as legislators
 FROM legislators_terms a
@@ -868,7 +869,7 @@ and b.year <= 2019
 GROUP BY 1
 ;
 /*
-
+add century cohort 
 */
 SELECT b.date
 ,date_part('century',first_term)::int as century
@@ -884,7 +885,7 @@ JOIN
 GROUP BY 1,2
 ;
 /*
-
+percent of total legislators in each year that the century cohort represents
 */
 SELECT date
 ,century
@@ -909,7 +910,7 @@ FROM
 ORDER BY 1,2
 ;
 /*
-
+Second approach - PIVOT table - Percent of legislators each year, by century first elected
 */
 SELECT date
 ,coalesce(sum(case when century = 18 then legislators end) * 100.0 / sum(legislators),0) as pct_18
@@ -934,8 +935,9 @@ FROM
 GROUP BY 1
 ORDER BY 1
 ;
+-- COHORT ON TENURE
 /*
-
+cumulative number of years in office for each legislator
 */
 SELECT id_bioguide, date
 ,count(date) over (partition by id_bioguide order by date rows between unbounded preceding and current row) as cume_years
@@ -947,7 +949,7 @@ FROM
 ) a
 ;
 /*
-
+number of legislators for each combination of date an cume_years
 */
 SELECT date, cume_years
 ,count(distinct id_bioguide) as legislators
@@ -968,7 +970,7 @@ FROM
 GROUP BY 1,2
 ;
 /*
-
+Quick profiling - grouping the tenures
 */
 SELECT date, count(*) as tenures
 FROM 
@@ -992,7 +994,8 @@ FROM
 GROUP BY 1
 ;
 /*
-
+Share of Legislators by tenure(number of years) in office
+Group tentures into four cohorts 
 */
 SELECT date, tenure
 ,legislators * 100.0 /
