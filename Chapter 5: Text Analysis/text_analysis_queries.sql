@@ -262,7 +262,7 @@ FROM ufo
 
 ------ 4.2. Exact matches
 /*
-
+category the sightings based on the first ò the description
 */
 SELECT first_word, description
 FROM
@@ -280,7 +280,7 @@ or first_word = 'Purple'
 or first_word = 'White'
 ;
 /*
-
+frequence of select colors used as the first word un UFO sighting sescriptions - reduce code
 */
 SELECT first_word, description
 FROM
@@ -292,7 +292,7 @@ FROM
 WHERE first_word in ('Red','Orange','Yellow','Green','Blue','Purple','White')
 ;
 /*
-
+frequency of first word types used as the first word on UFO sighting descriptions
 */
 SELECT 
 case when lower(first_word) in ('red','orange','yellow','green', 
@@ -319,14 +319,13 @@ ORDER BY 2 desc
 ------ 4.3. Regular expressions
 ------ 4.3.1. Finding and replacing with Regex
 /*
-
 */
 SELECT left(description,50)
 FROM ufo
 WHERE left(description,50) ~ '[0-9]+ light[s ,.]'
 ;
 /*
-
+Number of lights mentioned at the begining of UFO sighting description
 */
 SELECT (regexp_matches(description,'[0-9]+ light[s ,.]'))[1]
 ,count(*)
@@ -336,7 +335,7 @@ GROUP BY 1
 ORDER BY 2 desc
 ; 
 /*
-
+Full range of the number of lights
 */
 SELECT min(split_part(matched_text,' ',1)::int) as min_lights
 ,max(split_part(matched_text,' ',1)::int) as max_lights
@@ -350,7 +349,7 @@ FROM
 ) a
 ; 
 /*
-
+duration  of UFO sighting 
 */
 SELECT split_part(sighting_report,'Duration:',2) as duration
 ,count(*) as reports
@@ -358,7 +357,7 @@ FROM ufo
 GROUP BY 1
 ;
 /*
-
+clean up the duration field
 */
 SELECT duration
 ,(regexp_matches(duration,'\m[Mm][Ii][Nn][A-Za-z]*\y'))[1] as matched_minutes
@@ -386,7 +385,7 @@ FROM
 ;
 
 /*
-
+standarise both minutes and the hours
 */
 SELECT duration
 ,(regexp_matches(duration,'\m[Hh][Oo][Uu][Rr][A-Za-z]*\y'))[1] as matched_hour
@@ -417,7 +416,7 @@ FROM
 ;
 
 /*
-
+Top combinations of shape and locations in UFO sightings
 */
 SELECT concat(shape,' - ',location) as shape_location
 ,reports
@@ -494,7 +493,7 @@ GROUP BY 1
 ;
 
 /*
-
+most common words used in UFO sighting report description
 */
 SELECT word, count(*) as frequency
 FROM
@@ -507,7 +506,7 @@ ORDER BY 2 desc
 ;
 
 /*
-
+most common words used in UFO sighting report description - remove stop word 
 */
 SELECT word, count(*) as frequency
 FROM
