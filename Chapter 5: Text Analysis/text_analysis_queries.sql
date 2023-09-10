@@ -280,7 +280,7 @@ or first_word = 'Purple'
 or first_word = 'White'
 ;
 /*
-frequence of select colors used as the first word un UFO sighting sescriptions - reduce code
+frequence of select colors used as the first word in UFO sighting descriptions - reduce code
 */
 SELECT first_word, description
 FROM
