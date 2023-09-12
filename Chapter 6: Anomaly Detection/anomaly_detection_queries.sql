@@ -1,7 +1,7 @@
 ------ DETECTING OUTLIERS
 -- SORTING TO FIND ANOMALIES
 /*
-
+sort the earthquakes table by mag - find null as outlier - exclude the null - domain knowledge(9,8.5 is large), -9 => whether can be dectected?
 */
 SELECT mag
 ,count(id) as earthquakes
@@ -13,7 +13,7 @@ ORDER BY 1 desc
 ;
 
 /*
-
+Highest and lowest mags recorded for N. Cali
 */
 SELECT place, mag, count(*)
 FROM earthquakes
@@ -26,7 +26,7 @@ ORDER BY 1,2 desc
 -- CALCULATING PERCENTILES TO FIND ANOMALIES
 
 /*
-
+Percentile of the magnititudes of each earthquake
 */
 SELECT place
 ,mag
@@ -46,10 +46,10 @@ ORDER BY 1,2 desc
 ;
 
 /*
-
+Find the exact percentile of each row
 */
 SELECT place, mag
-,ntile(100) over (partition by place order by mag) as ntile
+    ,ntile(100) over (partition by place order by mag) as ntile
 FROM earthquakes
 WHERE mag is not null
 and place = 'Central Alaska'
@@ -57,7 +57,7 @@ ORDER BY 1,2 desc
 ;
 
 /*
-
+Found boundaries of each ntile
 */
 SELECT place, ntile
 ,max(mag) as maximum
@@ -75,7 +75,7 @@ ORDER BY 1,2 desc
 ;
 
 /*
-
+specific percentiles across the entire result set of a query
 */
 SELECT 
 percentile_cont(0.25) within group (order by mag) as pct_25
@@ -87,7 +87,7 @@ and place = 'Central Alaska'
 ;
 
 /*
-
+0.25 percentiles for mag and dep
 */
 SELECT 
 percentile_cont(0.25) within group (order by mag) as pct_25_mag
@@ -98,7 +98,7 @@ and place = 'Central Alaska'
 ;
 
 /*
-
+0.25 percentiles for mag and depth of each place
 */
 SELECT place
 ,percentile_cont(0.25) within group (order by mag) as pct_25_mag
@@ -110,7 +110,7 @@ GROUP BY place
 ;
 
 /*
-
+standard deviation of mag
 */
 SELECT stddev_pop(mag) as stddev_pop_mag
 ,stddev_samp(mag) as stddev_samp_mag
@@ -118,7 +118,7 @@ FROM earthquakes
 ;
 
 /*
-
+std, avg, zscores for mag
 */
 SELECT a.place
 ,a.mag
@@ -137,10 +137,11 @@ WHERE a.mag is not null
 ORDER BY 2 desc
 ;
 
--- GRAPHING TO FIND ANOMALIES VUSUALLY
+-- GRAPHING TO FIND ANOMALIES VISUALLY
 
 /*
-
+Dítribution of earthquake magnitudes
+A zoomed in view of the distribution of earthquake magnitudes, focused on the highest magnitudes
 */
 SELECT mag
 ,count(*) as earthquakes
@@ -150,7 +151,8 @@ ORDER BY 1
 ;
 
 /*
-
+Scatter plot of the magnitude and depth of earthquakes
+Scatter plot of the magnitude and depth of earthquakes, zoomed in and with circles sized by the number of earthquakes
 */
 SELECT mag, depth
 ,count(*) as earthquakes
@@ -160,7 +162,7 @@ ORDER BY 1,2
 ;
 
 /*
-
+Box plox shoing magnitude distribution of earthquakes in Japan
 */
 SELECT mag
 FROM earthquakes
@@ -169,7 +171,7 @@ ORDER BY 1
 ;
 
 /*
-
+Key values for the box plot with SQL
 */
 SELECT ntile_25, median, ntile_75
 ,(ntile_75 - ntile_25) * 1.5 as iqr
@@ -187,7 +189,7 @@ FROM
 
 -- THE PREVIOUS QUERY CAN BE WRITTEN WITHOUT THE SUBQUERY
 /*
-
+Key values for the box plot with SQL use windowfunction
 */
 SELECT percentile_cont(0.25) within group (order by mag) as ntile_25
 ,percentile_cont(0.5) within group (order by mag) as median
@@ -200,7 +202,7 @@ WHERE place like '%Japan%'
 ;
 
 /*
-
+Box plot of magnitudes of earthqukes in Japan, by year
 */
 SELECT date_part('year',time)::int as year
 ,mag
@@ -213,7 +215,7 @@ ORDER BY 1,2
 -- ANOMALOUS VALUES
 
 /*
-
+1. anomalies in significant digits
 */
 SELECT mag, count(*)
 FROM earthquakes
@@ -224,7 +226,7 @@ limit 100
 ;
 
 /*
-
+2. network where depth > 600 (as outliers) being collected?
 */
 SELECT net, count(*)
 FROM earthquakes
@@ -233,7 +235,7 @@ GROUP BY 1
 ;
 
 /*
-
+place where outliers being collected?
 */
 SELECT place, count(*)
 FROM earthquakes
@@ -242,7 +244,7 @@ GROUP BY 1
 ;
 
 /*
-
+clean place for right answer
 */
 SELECT 
 case when place like '% of %' then split_part(place,' of ',2) 
@@ -255,7 +257,7 @@ ORDER BY 2 desc
 ;
 
 /*
-
+3. anomalies from text errors
 */
 SELECT count(distinct type) as distinct_types
 ,count(distinct lower(type)) as distinct_lower
@@ -263,7 +265,7 @@ FROM earthquakes
 ;
 
 /*
-
+which values is wrong input
 */
 SELECT type
 ,lower(type)
@@ -275,7 +277,7 @@ ORDER BY 2,4 desc
 ;
 
 /*
-
+list of type values -> check for wrong misspelling
 */
 SELECT type, count(*) as records
 FROM earthquakes
@@ -285,7 +287,7 @@ ORDER BY 2 desc
 
 -- ANOMALOUS COUNTS OR FREQUENCIES
 /*
-
+check the counts of earthquakes by year
 */
 SELECT date_trunc('year',time)::date as earthquake_year
 ,count(*) as earthquakes
@@ -294,7 +296,7 @@ GROUP BY 1
 ;
 
 /*
-
+counts of earthquakes by month - drill down/ number of earthquakes per month
 */
 SELECT date_trunc('month',time)::date as earthquake_month
 ,count(*) as earthquakes
@@ -303,7 +305,7 @@ GROUP BY 1
 ;
 
 /*
-
+check status (ways reviewed) to discover the reason of anomalies / number of earthquakes per month, split by status
 */
 SELECT date_trunc('month',time)::date as earthquake_month
 ,status
@@ -314,7 +316,7 @@ ORDER BY 1
 ;
 
 /*
-
+number of earthquakes by place
 */
 SELECT place, count(*) as earthquakes
 FROM earthquakes
@@ -324,7 +326,7 @@ ORDER BY 2 desc
 ;
 
 /*
-
+clean place for right analysis
 */
 SELECT 
 case when place like '% of %' then split_part(place,' of ',2)
@@ -339,7 +341,7 @@ ORDER BY 2 desc
 
 -- ANOMALIES FROM THE ABSENCE OF DATA
 /*
-
+Gaps btw large earthquakes and the time since the most recent one; is used to judge the retaintion of customer
 */
 SELECT place
 ,extract('days' from '2020-12-31 23:59:59' - latest) 
@@ -355,7 +357,7 @@ FROM
         ,lead(time) over (partition by place order by time) - time as gap
         ,max(time) over (partition by place) as latest
         FROM
-        (
+        (-- cleaned place with time where mga>5
                 SELECT 
                 replace(
                   initcap(
@@ -376,7 +378,7 @@ GROUP BY 1,2
 ------ HANDLING ANOMALIES
 -- REMOVAL
 /*
-
+remove -9, -9.99 values
 */
 SELECT time, mag, type
 FROM earthquakes
@@ -385,7 +387,7 @@ limit 100
 ;
 
 /*
-
+check the change after removing
 */
 SELECT avg(mag) as avg_mag
 ,avg(case when mag > -9 then mag end) as avg_mag_adjusted
@@ -393,7 +395,7 @@ FROM earthquakes
 ;
 
 /*
-
+check the change after removing in 'Yellowstone National Park, Wyoming'
 */
 SELECT avg(mag) as avg_mag
 ,avg(case when mag > -9 then mag end) as avg_mag_adjusted
@@ -403,7 +405,7 @@ WHERE place = 'Yellowstone National Park, Wyoming'
 
 -- REPLACEMENT WITH ALTERNATE VALUES
 /*
-
+group the types that are not earthquakes into a single "Other"
 */
 SELECT 
 case when type = 'earthquake' then type
@@ -415,7 +417,7 @@ GROUP BY 1
 ;
 
 /*
-
+replace the extreme values with  the nearest high or low calue that is not extreme
 */
 SELECT a.time, a.place, a.mag
 ,case when a.mag > b.percentile_95 then b.percentile_95
@@ -435,7 +437,7 @@ FROM earthquakes
 
 -- RESCALING
 /*
-
+converting to log scale
 */
 SELECT round(depth,1) as depth
 ,log(round(depth,1)) as log_depth
