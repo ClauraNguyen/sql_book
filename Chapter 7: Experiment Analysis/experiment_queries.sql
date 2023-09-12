@@ -1,5 +1,8 @@
------- Types of experiments
--- Experiments with binary outcomes
+------ TYPES OF EXPERIMENTS
+-- EXPERIMENTS WITH BINARY OUTCOMES
+/*
+percent completed in each variant / whether the new version will increase the numner of players who complete the onboarding
+*/
 SELECT a.variant
 ,count(a.user_id) as total_cohorted
 ,count(b.user_id) as completions
@@ -11,7 +14,10 @@ WHERE a.exp_name = 'Onboarding'
 GROUP BY 1
 ;
 
--- Experiments with continuous outcomes
+-- EXPERIMENTS WITH CONTINUOUS OUTCOMES
+/*
+total, mean and stddev value by variant / whether variant affected spending?
+*/
 SELECT variant
 ,count(user_id) as total_cohorted
 ,avg(amount) as mean_amount
@@ -29,6 +35,9 @@ FROM
 GROUP BY 1
 ;
 
+/*
+whether variant affected spending among those users who completed onboarding
+*/
 SELECT variant
 ,count(user_id) as total_cohorted
 ,avg(amount) as mean_amount
@@ -48,8 +57,12 @@ FROM
 GROUP BY 1
 ;
 
------- Challenges with experiments
--- Outliers
+------ CHALLENGES WITH EXPERIMENTS
+-- VARIANT ASSIGNMENT
+-- OUTLIERS
+/*
+turn continuos metric into binary outcome (amount of purchase -> number of purchase)
+*/
 SELECT a.variant
 ,count(distinct a.user_id) as total_cohorted
 ,count(distinct b.user_id) as purchasers
@@ -62,7 +75,10 @@ WHERE a.exp_name = 'Onboarding'
 GROUP BY 1
 ;
 
--- Time boxing
+-- TIME BOXING
+/*
+purchases that occured within the interval "7 days"
+*/
 SELECT variant
 ,count(user_id) as total_cohorted
 ,avg(amount) as mean_amount
@@ -81,9 +97,11 @@ FROM
 GROUP BY 1
 ;
 
------- When controlled experiments aren't possible
--- Pre-/post- analysis
-
+------ WHEN CONTROLLED EXPERIMENTS AREN'T POSSIBLE
+-- PRE-/POST- ANALYSIS
+/*
+before and after a critical events
+*/
 SELECT 
 case when a.created between '2020-01-13' and '2020-01-26' then 'pre'
      when a.created between '2020-01-27' and '2020-02-09' then 'post'
@@ -99,7 +117,10 @@ WHERE a.created between '2020-01-13' and '2020-02-09'
 GROUP BY 1
 ;
 
--- Natural experiment analysis
+-- NATURAL EXPERIMENT ANALYSIS
+/*
+case canada have an special event, using US for compare bcz they have the same experience
+*/
 SELECT a.country
 ,count(distinct a.user_id) as total_cohorted
 ,count(distinct b.user_id) as purchasers
