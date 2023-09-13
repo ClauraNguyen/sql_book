@@ -1,6 +1,6 @@
 ------------------------------------- funnel --------------------------------------------------------------------
 -- note this is pseudocode
-
+-- users for each step and percent pass to each step 
 SELECT count(a.user_id) as all_users
 ,count(b.user_id) as step_one_users
 ,count(b.user_id) / count(a.user_id) as pct_step_one
@@ -37,6 +37,7 @@ FROM
 WHERE gap_months is not null
 ;
 
+-- count by gap month btw each purchase
 SELECT gap_months, count(*)
 FROM
 (
@@ -52,6 +53,7 @@ FROM
 WHERE gap_months is not null
 GROUP BY 1
 ;
+
 
 -- days since last
 SELECT date_part('year',interval_since_last) as years_since_last
@@ -77,14 +79,14 @@ case when months_since_last <= 23 then 'Current'
      end as status
 ,sum(reps) as total_reps     
 FROM
-(
+(-- frequency of reps by period since last to 19/8/2020
         SELECT 
         date_part('year',interval_since_last) * 12 
-         + date_part('year',interval_since_last)
+         + date_part('month',interval_since_last)
          as months_since_last
         ,count(*) as reps
         FROM
-        (
+        (-- period from last participate to 19/5/2020 as rep
                 SELECT id_bioguide
                 ,max(term_start) as max_date
                 ,age('2020-05-19',max(term_start)) as interval_since_last
@@ -101,10 +103,11 @@ GROUP BY 1
 ------------------------------------- basket analysis --------------------------------------------------------------------
 -- note this is pseudocode
 
+-- number of customers purchased  backets of 2 products 
 SELECT product1, product2
 ,count(customer_id) as customers
 FROM
-(
+(-- list of customers purchase  baskets of 2 products
         SELECT a.customer_id
         ,a.product as product1
         ,b.product as product2
@@ -115,10 +118,11 @@ GROUP BY 1,2
 ORDER BY 3 desc
 ;
 
+-- number of customers purchased a list of products
 SELECT products
 ,count(customer_id) as customers
 FROM
-(
+(-- list of product purchase by each customer
         SELECT customer_id
         ,string_agg(product,', ') as products
         FROM purchases
