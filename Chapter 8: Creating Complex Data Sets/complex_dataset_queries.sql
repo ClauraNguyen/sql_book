@@ -15,9 +15,9 @@ GROUP BY 1,2,3
 ;
 
 ----- ORGANIZING COMPUTATIONS
-
+-- SQL CLAUSE ORDER
 /*
-
+where -> group -> having
 */
 SELECT state
 ,count(*) as terms
@@ -28,7 +28,7 @@ ORDER BY 2 desc
 ;
 
 /*
-
+where -> group -> having -> window, can use agg
 */
 SELECT state
 ,count(*) as terms
@@ -38,7 +38,7 @@ GROUP BY 1
 ;
 
 /*
-
+also by order by
 */
 SELECT state
 ,count(*) as terms
@@ -47,8 +47,9 @@ FROM legislators_terms
 GROUP BY 1
 ;
 
+-- SUBQUERIES
 /*
-
+Lateral -> a little use
 */
 SELECT date_part('year',c.first_term) as first_year
 ,a.party
@@ -93,7 +94,7 @@ JOIN
 GROUP BY 1,2
 ;
 
-
+-- TEMPORATY TABLES
 /*
 
 */
@@ -103,25 +104,22 @@ state varchar primary key
 )
 ;
 
-/*
 
-*/
 INSERT into temp_states
 SELECT distinct state
 FROM legislators_terms
 ;
 
-/*
 
-*/
 CREATE temporary table temp_states
 as
 SELECT distinct state
 FROM legislators_terms
 ;    
 
+-- COMMON TABLE EXPRESSIONS
 /*
-
+CTE
 */
 WITH first_term as
 (
@@ -137,9 +135,9 @@ JOIN legislators_terms b on a.id_bioguide = b.id_bioguide
 GROUP BY 1
 ;
 
-
+-- GROUPING SETS
 /*
-
+Normal ways
 */
 SELECT platform
 ,null as genre
@@ -164,7 +162,7 @@ GROUP BY 1,2,3
 ;
 
 /*
-
+Groupset ways
 */
 SELECT platform, genre, publisher
 ,sum(global_sales) as global_sales
@@ -173,7 +171,7 @@ GROUP BY grouping sets (platform, genre, publisher)
 ;
 
 /*
-
+change Null -> All for cleaning
 */
 SELECT coalesce(platform,'All') as platform
 ,coalesce(genre,'All') as genre
@@ -185,7 +183,7 @@ ORDER BY 1,2,3
 ;
 
 /*
-
+cube as same results
 */
 SELECT coalesce(platform,'All') as platform
 ,coalesce(genre,'All') as genre
@@ -197,8 +195,9 @@ ORDER BY 1,2,3
 ;
 
 ----- MANAGING DATA SET SIZE AND PRIVACY
+-- colect a randomize sample from datasets
 /*
-
+by order
 */
 SELECT 123456 % 100;
 
@@ -206,9 +205,9 @@ SELECT 123456 % 100;
 
 */
 SELECT mod(123456,100);
-
+-- REDUCING DIMENSIONALITY
 /*
-
+group groups
 */
 SELECT case when state in ('CA','TX','FL','NY','PA') then state 
             else 'Other' end as state_group
@@ -219,7 +218,7 @@ ORDER BY 2 desc
 ;
 
 /*
-
+just 5 highest state + other
 */
 SELECT case when b.rank <= 5 then a.state 
             else 'Other' end as state_group
@@ -238,7 +237,7 @@ ORDER BY 2 desc
 ;
 
 /*
-
+catogarize continuous values - terms
 */
 SELECT case when terms >= 2 then true else false end as two_terms_flag
 ,count(*) as legislators
@@ -253,7 +252,7 @@ GROUP BY 1
 ;
 
 /*
-
+catogarize continuous values - terms
 */
 SELECT 
 case when terms >= 10 then '10+'
@@ -269,7 +268,7 @@ FROM
 ) a
 GROUP BY 1
 ;
-
+-- DATA PRIVACY
 /*
 
 */
