@@ -24,7 +24,7 @@ LEFT JOIN step_two c on a.user_id = c.user_id
 ------------------------------------- churn, lapse --------------------------------------------------------------------
 -- these examples use the legislators data set, which can be found in the Chapter 4 directory
 
--- average gaps
+-- average gaps find churn threshold (2 year, 2 mons)
 SELECT avg(gap_interval) as avg_gap
 FROM
 (
@@ -37,7 +37,7 @@ FROM
 WHERE gap_months is not null
 ;
 
--- count by gap month btw each purchase
+-- count by gap month btw each purchase / distribution of legth of gaps between representative term start dtes, showing range from 10 - 59 months. --> find churn threshold
 SELECT gap_months, count(*)
 FROM
 (
